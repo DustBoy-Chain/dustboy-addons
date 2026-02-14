@@ -1,0 +1,55 @@
+#!/command/with-contenv bash
+# JibChain L1 — Lighthouse Consensus Client
+set -e
+
+. /usr/lib/bashio/bashio.sh 2>/dev/null || true
+
+DATA_DIR="/data"
+CL_DIR="${DATA_DIR}/lighthouse"
+CONFIG_DIR="${DATA_DIR}/config"
+TESTNET_DIR="${CONFIG_DIR}/testnet"
+
+# Read options from HA config
+HTTP_PORT=$(bashio::config 'lighthouse_http_port' 2>/dev/null || echo "5002")
+P2P_PORT=$(bashio::config 'lighthouse_p2p_port' 2>/dev/null || echo "9100")
+TARGET_PEERS=$(bashio::config 'lighthouse_target_peers' 2>/dev/null || echo "30")
+LOG_LEVEL=$(bashio::config 'log_level' 2>/dev/null || echo "info")
+
+# Wait for Geth authrpc to be available
+echo "[lighthouse] Waiting for Geth Engine API on 127.0.0.1:8551..."
+for i in $(seq 1 60); do
+    if curl -sf http://127.0.0.1:8551 > /dev/null 2>&1 || nc -z 127.0.0.1 8551 2>/dev/null; then
+        echo "[lighthouse] Geth Engine API ready"
+        break
+    fi
+    if [ "$i" = "60" ]; then
+        echo "[lighthouse] WARNING: Geth not responding after 60s, starting anyway..."
+    fi
+    sleep 1
+done
+
+# Read CL bootnodes
+BOOT_NODES=""
+if [ -f "${TESTNET_DIR}/cl_nodes.list" ]; then
+    BOOT_NODES=$(cat "${TESTNET_DIR}/cl_nodes.list" | tr '\n' ',' | sed 's/,$//')
+fi
+
+echo "[lighthouse] Starting Lighthouse (peers=${TARGET_PEERS}, p2p=${P2P_PORT})"
+
+exec lighthouse beacon \
+    --datadir "${CL_DIR}" \
+    --testnet-dir "${TESTNET_DIR}" \
+    --execution-endpoint http://127.0.0.1:8551 \
+    --execution-jwt "${CONFIG_DIR}/jwt.hex" \
+    --http \
+    --http-address 0.0.0.0 \
+    --http-port "${HTTP_PORT}" \
+    --target-peers "${TARGET_PEERS}" \
+    --enr-udp-port "${P2P_PORT}" \
+    --enr-tcp-port "${P2P_PORT}" \
+    --port "${P2P_PORT}" \
+    --disable-packet-filter \
+    --prune-blobs false \
+    --checkpoint-sync-url https://metrabyte-cl.jibchain.net/ \
+    --boot-nodes "${BOOT_NODES}" \
+    --debug-level "${LOG_LEVEL}"

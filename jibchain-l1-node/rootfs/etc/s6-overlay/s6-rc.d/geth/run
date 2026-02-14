@@ -1,0 +1,63 @@
+#!/command/with-contenv bash
+# JibChain L1 — Geth Execution Client
+set -e
+
+. /usr/lib/bashio/bashio.sh 2>/dev/null || true
+
+DATA_DIR="/data"
+GETH_DIR="${DATA_DIR}/geth"
+CONFIG_DIR="${DATA_DIR}/config"
+
+# Read options from HA config
+CACHE=$(bashio::config 'geth_cache' 2>/dev/null || echo "2048")
+GCMODE=$(bashio::config 'geth_gcmode' 2>/dev/null || echo "full")
+MAXPEERS=$(bashio::config 'geth_maxpeers' 2>/dev/null || echo "30")
+HTTP_PORT=$(bashio::config 'geth_http_port' 2>/dev/null || echo "8545")
+WS_PORT=$(bashio::config 'geth_ws_port' 2>/dev/null || echo "8546")
+P2P_PORT=$(bashio::config 'geth_p2p_port' 2>/dev/null || echo "30303")
+LOG_LEVEL=$(bashio::config 'log_level' 2>/dev/null || echo "info")
+
+# Map log level to Geth verbosity
+case "${LOG_LEVEL}" in
+    trace) VERBOSITY=5 ;;
+    debug) VERBOSITY=4 ;;
+    info)  VERBOSITY=3 ;;
+    warn)  VERBOSITY=2 ;;
+    error) VERBOSITY=1 ;;
+    *)     VERBOSITY=3 ;;
+esac
+
+# Read bootnodes
+BOOTNODES=""
+if [ -f "${CONFIG_DIR}/el_nodes.list" ]; then
+    BOOTNODES=$(cat "${CONFIG_DIR}/el_nodes.list" | tr '\n' ',' | sed 's/,$//')
+fi
+
+echo "[geth] Starting Geth (cache=${CACHE}MB, mode=${GCMODE}, peers=${MAXPEERS})"
+
+exec geth \
+    --datadir "${GETH_DIR}" \
+    --networkid 8899 \
+    --authrpc.addr 127.0.0.1 \
+    --authrpc.port 8551 \
+    --authrpc.vhosts '*' \
+    --authrpc.jwtsecret "${CONFIG_DIR}/jwt.hex" \
+    --http \
+    --http.addr 0.0.0.0 \
+    --http.api eth,engine,web3,net \
+    --http.port "${HTTP_PORT}" \
+    --http.corsdomain '*' \
+    --http.vhosts '*' \
+    --ws \
+    --ws.addr 0.0.0.0 \
+    --ws.port "${WS_PORT}" \
+    --ws.api eth,engine,web3,net \
+    --ws.origins '*' \
+    --syncmode snap \
+    --gcmode "${GCMODE}" \
+    --cache "${CACHE}" \
+    --maxpeers "${MAXPEERS}" \
+    --verbosity "${VERBOSITY}" \
+    --port "${P2P_PORT}" \
+    --discovery.port "${P2P_PORT}" \
+    --bootnodes "${BOOTNODES}"
