@@ -1,6 +1,6 @@
 ---
 build_from:
-  aarch64: ghcr.io/home-assistant/aarch64-base:3.21
+  aarch64: ghcr.io/home-assistant/aarch64-base-debian:bookworm
 args:
   OP_RETH_VERSION: v1.5.1
   OP_NODE_IMAGE: ghcr.io/otternode-io/ott-op-stack-1103
