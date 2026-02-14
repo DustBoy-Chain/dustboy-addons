@@ -1,20 +1,22 @@
 # DustBoy Chain Node — HA Add-on
 # Multi-stage build: extract binaries from proven production images
 
-# Stage 1: op-reth (Rust, musl-linked — Alpine compatible)
+# All ARGs must be declared before any FROM to be visible across stages
 ARG OP_RETH_VERSION=v1.5.1
+ARG OP_NODE_IMAGE=ghcr.io/otternode-io/ott-op-stack-1103
+ARG DA_SERVER_IMAGE=us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest
+ARG BUILD_FROM
+
+# Stage 1: op-reth (Rust, musl-linked — Alpine compatible)
 FROM ghcr.io/paradigmxyz/op-reth:${OP_RETH_VERSION} AS op-reth-bin
 
 # Stage 2: op-node (Go, statically linked)
-ARG OP_NODE_IMAGE=ghcr.io/otternode-io/ott-op-stack-1103
 FROM ${OP_NODE_IMAGE} AS opstack-bin
 
 # Stage 3: da-server (Go, statically linked)
-ARG DA_SERVER_IMAGE=us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest
 FROM ${DA_SERVER_IMAGE} AS da-server-bin
 
 # Final stage: HA base image with s6-overlay
-ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
 # Install runtime dependencies
@@ -30,7 +32,6 @@ COPY --from=opstack-bin /usr/local/bin/op-node /usr/local/bin/op-node
 COPY --from=da-server-bin /usr/local/bin/da-server /usr/local/bin/da-server
 
 # Bundle chain config (genesis.json, rollup.json, l1-chain-config.json)
-# Place these files in chain-config/ before building
 COPY chain-config/ /opt/dustboy/chain-config/
 
 # Copy s6-overlay service definitions and scripts
