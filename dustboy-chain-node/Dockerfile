@@ -28,7 +28,7 @@ RUN apk add --no-cache \
 
 # Copy binaries from build stages
 COPY --from=op-reth-bin /usr/local/bin/op-reth /usr/local/bin/op-reth
-COPY --from=opstack-bin /usr/local/bin/op-node /usr/local/bin/op-node
+COPY --from=opstack-bin /app/op-node /usr/local/bin/op-node
 COPY --from=da-server-bin /usr/local/bin/da-server /usr/local/bin/da-server
 
 # Bundle chain config (genesis.json, rollup.json, l1-chain-config.json)
