@@ -1,0 +1,50 @@
+---
+name: DustBoy Chain Node
+version: "0.1.0"
+slug: dustboy-chain-node
+description: >-
+  DustBoy IoT Blockchain replica node (OP Stack L2).
+  Runs op-reth, op-node, and da-server to sync with the
+  DustBoy Chain (Chain ID 555888) production network.
+url: https://github.com/DustBoy-Chain/dustboy-infra
+arch:
+  - aarch64
+init: false
+startup: system
+boot: auto
+host_network: true
+ports:
+  "9545/tcp": 9545
+  "9546/tcp": 9546
+  "30301/tcp": 30301
+  "30301/udp": 30301
+  "9222/tcp": 9222
+  "9222/udp": 9222
+ports_description:
+  "9545/tcp": L2 JSON-RPC
+  "9546/tcp": L2 WebSocket
+  "30301/tcp": op-reth P2P (TCP)
+  "30301/udp": op-reth P2P (UDP)
+  "9222/tcp": op-node P2P (TCP)
+  "9222/udp": op-node P2P (UDP)
+map:
+  - type: share
+    read_only: false
+options:
+  l1_rpc_url: "https://rpc-l1.inan.in.th"
+  l1_rpc_kind: "standard"
+  log_level: "info"
+  p2p_static_peer: "/ip4/188.245.172.213/tcp/34940/p2p/16Uiu2HAm6rdrtKDkwkGxuhiSg4zmx4JXyANNYwbxVNArSkNcysMP"
+  da_s3_bucket: "jbcl2-da"
+  da_s3_endpoint: ""
+  da_s3_access_key: ""
+  da_s3_secret: ""
+schema:
+  l1_rpc_url: url
+  l1_rpc_kind: "list(standard|basic|erigon|alchemy|quicknode)"
+  log_level: "list(trace|debug|info|warn|error)"
+  p2p_static_peer: str
+  da_s3_bucket: str
+  da_s3_endpoint: str
+  da_s3_access_key: str
+  da_s3_secret: str

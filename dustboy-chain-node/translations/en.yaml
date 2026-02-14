@@ -1,0 +1,36 @@
+---
+configuration:
+  l1_rpc_url:
+    name: L1 RPC URL
+    description: >-
+      JibChain L1 RPC endpoint for deriving L2 blocks.
+      Default uses the public RPC. Use a local node for better reliability.
+  l1_rpc_kind:
+    name: L1 RPC Kind
+    description: >-
+      Type of L1 RPC provider. Use "standard" for most Geth-based nodes.
+  log_level:
+    name: Log Level
+    description: >-
+      Logging verbosity for all services (op-reth, op-node, da-server).
+  p2p_static_peer:
+    name: P2P Static Peer
+    description: >-
+      Multiaddr of the DustBoy Chain primary sequencer for P2P gossip.
+      The default points to the production sequencer.
+  da_s3_bucket:
+    name: DA S3 Bucket
+    description: >-
+      S3 bucket name for Alt-DA blob storage.
+  da_s3_endpoint:
+    name: DA S3 Endpoint
+    description: >-
+      S3-compatible endpoint URL (e.g., Cloudflare R2).
+  da_s3_access_key:
+    name: DA S3 Access Key
+    description: >-
+      S3 access key ID for DA blob retrieval.
+  da_s3_secret:
+    name: DA S3 Secret
+    description: >-
+      S3 access key secret for DA blob retrieval.

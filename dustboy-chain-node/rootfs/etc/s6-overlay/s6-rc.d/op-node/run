@@ -1,0 +1,50 @@
+#!/command/with-contenv bashio
+# op-node — OP Stack consensus layer (L1 derivation + P2P)
+
+L1_RPC_URL=$(bashio::config 'l1_rpc_url')
+L1_RPC_KIND=$(bashio::config 'l1_rpc_kind')
+LOG_LEVEL=$(bashio::config 'log_level')
+P2P_STATIC_PEER=$(bashio::config 'p2p_static_peer')
+DATA_DIR="/data"
+
+echo "[op-node] Starting consensus layer"
+echo "[op-node] L1 RPC: ${L1_RPC_URL}"
+echo "[op-node] P2P peer: ${P2P_STATIC_PEER}"
+
+# Wait for op-reth authrpc to be ready
+echo "[op-node] Waiting for op-reth authrpc..."
+for i in $(seq 1 30); do
+    if curl -so /dev/null --connect-timeout 2 http://127.0.0.1:8551 2>/dev/null; then
+        echo "[op-node] op-reth authrpc ready"
+        break
+    fi
+    sleep 2
+done
+
+exec op-node \
+    --l2=http://127.0.0.1:8551 \
+    --l2.jwt-secret="${DATA_DIR}/config/jwt.txt" \
+    --verifier.l1-confs=4 \
+    --rollup.config="${DATA_DIR}/config/rollup.json" \
+    --rpc.addr=0.0.0.0 \
+    --rpc.port=8547 \
+    --rpc.enable-admin \
+    --l1="${L1_RPC_URL}" \
+    --l1.rpckind="${L1_RPC_KIND}" \
+    --l1.trustrpc=true \
+    --l1.beacon.ignore=true \
+    --altda.enabled=true \
+    --altda.da-service=false \
+    --altda.da-server=http://127.0.0.1:3100 \
+    --altda.max-concurrent-da-requests=10 \
+    --p2p.listen.ip=0.0.0.0 \
+    --p2p.listen.tcp=9222 \
+    --p2p.listen.udp=9222 \
+    --p2p.static="${P2P_STATIC_PEER}" \
+    --p2p.priv.path="${DATA_DIR}/config/p2p-node-key" \
+    --snapshotlog.file="${DATA_DIR}/logs/snapshot.log" \
+    --safedb.path="${DATA_DIR}/node-db" \
+    --log.level="${LOG_LEVEL}" \
+    --metrics.enabled \
+    --metrics.addr=0.0.0.0 \
+    --metrics.port=7300
