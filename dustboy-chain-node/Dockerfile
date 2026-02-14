@@ -7,7 +7,7 @@ ARG OP_NODE_IMAGE=ghcr.io/otternode-io/ott-op-stack-1103
 ARG DA_SERVER_IMAGE=us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest
 ARG BUILD_FROM
 
-# Stage 1: op-reth (Rust, musl-linked — Alpine compatible)
+# Stage 1: op-reth (Rust, glibc-linked — needs gcompat on Alpine)
 FROM ghcr.io/paradigmxyz/op-reth:${OP_RETH_VERSION} AS op-reth-bin
 
 # Stage 2: op-node (Go, statically linked)
@@ -19,12 +19,14 @@ FROM ${DA_SERVER_IMAGE} AS da-server-bin
 # Final stage: HA base image with s6-overlay
 FROM ${BUILD_FROM}
 
-# Install runtime dependencies
+# Install runtime dependencies + glibc compat for op-reth (glibc-linked Rust binary)
 RUN apk add --no-cache \
     bash \
     curl \
     jq \
-    openssl
+    openssl \
+    gcompat \
+    libstdc++
 
 # Copy binaries from build stages
 COPY --from=op-reth-bin /usr/local/bin/op-reth /usr/local/bin/op-reth
