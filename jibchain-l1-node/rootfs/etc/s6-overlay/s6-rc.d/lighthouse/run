@@ -18,7 +18,7 @@ LOG_LEVEL=$(bashio::config 'log_level' 2>/dev/null || echo "info")
 # Wait for Geth authrpc to be available
 echo "[lighthouse] Waiting for Geth Engine API on 127.0.0.1:8561..."
 for i in $(seq 1 60); do
-    if curl -sf http://127.0.0.1:8561 > /dev/null 2>&1 || nc -z 127.0.0.1 8561 2>/dev/null; then
+    if curl -s --connect-timeout 1 -o /dev/null http://127.0.0.1:8561 2>/dev/null; then
         echo "[lighthouse] Geth Engine API ready"
         break
     fi
