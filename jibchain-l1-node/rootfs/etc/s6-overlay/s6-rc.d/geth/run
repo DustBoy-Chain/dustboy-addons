@@ -39,7 +39,7 @@ exec geth \
     --datadir "${GETH_DIR}" \
     --networkid 8899 \
     --authrpc.addr 127.0.0.1 \
-    --authrpc.port 8551 \
+    --authrpc.port 8561 \
     --authrpc.vhosts '*' \
     --authrpc.jwtsecret "${CONFIG_DIR}/jwt.hex" \
     --http \
