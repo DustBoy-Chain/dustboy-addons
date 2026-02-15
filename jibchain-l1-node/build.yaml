@@ -3,4 +3,4 @@ build_from:
   aarch64: ghcr.io/home-assistant/aarch64-base-debian:bookworm
 args:
   GETH_IMAGE: ethereum/client-go:release-1.15
-  LIGHTHOUSE_IMAGE: lighthouse-gnumalloc:v5.0.0
+  LIGHTHOUSE_IMAGE: sigp/lighthouse:v5.0.0

@@ -2,11 +2,11 @@
 # Multi-stage build: extract binaries from production images
 
 ARG GETH_IMAGE=ethereum/client-go:release-1.15
-# NOTE: Use lighthouse-gnumalloc:v5.0.0 (built without jemalloc) for Pi 5
-# which has 16KB pages. Standard sigp/lighthouse uses jemalloc compiled for
-# 4KB pages and crashes on Pi 5 with "Unsupported system page size".
-# Build with: --no-default-features (disables jemalloc, uses system allocator)
-ARG LIGHTHOUSE_IMAGE=lighthouse-gnumalloc:v5.0.0
+# NOTE: On Pi 5 (16KB pages), the standard Lighthouse binary crashes because
+# jemalloc doesn't support 16KB pages. After HA builds the add-on, replace
+# /usr/local/bin/lighthouse with a gnumalloc build (system allocator).
+# Build gnumalloc version: cargo build --release --no-default-features --bin lighthouse
+ARG LIGHTHOUSE_IMAGE=sigp/lighthouse:v5.0.0
 ARG BUILD_FROM
 
 # Stage 1: Geth (Go, statically linked)
