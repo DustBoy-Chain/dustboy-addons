@@ -44,6 +44,6 @@ RUN chmod +x /etc/s6-overlay/scripts/* /usr/bin/healthcheck.sh 2>/dev/null || tr
 RUN find /etc/s6-overlay/s6-rc.d -name "run" -exec chmod +x {} \;
 
 LABEL \
-    io.hass.version="0.2.0" \
+    io.hass.version="0.2.1" \
     io.hass.type="addon" \
     io.hass.arch="aarch64"
