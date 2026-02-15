@@ -1,6 +1,6 @@
 ---
 name: DustBoy Chain Node
-version: "0.1.0"
+version: "0.2.0"
 slug: dustboy-chain-node
 description: >-
   DustBoy IoT Blockchain replica node (OP Stack L2).
