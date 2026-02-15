@@ -7,6 +7,17 @@ LOG_LEVEL=$(bashio::config 'log_level')
 P2P_STATIC_PEER=$(bashio::config 'p2p_static_peer')
 DATA_DIR="/data"
 
+# Auto-detect local JibChain L1 node (from jibchain-l1-node add-on)
+LOCAL_L1="http://127.0.0.1:8545"
+if curl -s --connect-timeout 2 -X POST -H 'Content-Type: application/json' \
+    -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' \
+    "${LOCAL_L1}" 2>/dev/null | grep -q '0x22c3'; then
+    echo "[op-node] Local L1 detected at ${LOCAL_L1} (chain 8899)"
+    L1_RPC_URL="${LOCAL_L1}"
+else
+    echo "[op-node] No local L1 — using configured: ${L1_RPC_URL}"
+fi
+
 echo "[op-node] Starting consensus layer"
 echo "[op-node] L1 RPC: ${L1_RPC_URL}"
 echo "[op-node] P2P peer: ${P2P_STATIC_PEER}"
